@@ -2,7 +2,6 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import TopBar from './components/TopBar';
-import ChatbotWidget from './components/ChatbotWidget';
 import Overview from './pages/Overview';
 import Analytics from './pages/Analytics';
 import Transactions from './pages/Transactions';
@@ -32,7 +31,6 @@ const DashboardLayout = () => {
           </Routes>
         </div>
       </main>
-      <ChatbotWidget />
     </div>
   );
 };

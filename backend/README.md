@@ -25,3 +25,4 @@ Express + MongoDB backend for mobile app and admin dashboard integration.
 - `GET /api/v1/auth/users`
 - `GET /api/v1/transactions`
 - `POST /api/v1/transactions`
+- `POST /api/v1/ml/predict`

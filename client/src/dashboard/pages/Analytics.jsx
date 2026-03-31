@@ -1,56 +1,177 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import './Analytics.css';
 
-/* -------- Mini bar chart (pure CSS/SVG) -------- */
-const BAR_DATA = [
-  { label: 'Mon', total: 1840, fraud: 12 },
-  { label: 'Tue', total: 2100, fraud: 18 },
-  { label: 'Wed', total: 1760, fraud: 8  },
-  { label: 'Thu', total: 2450, fraud: 31 },
-  { label: 'Fri', total: 2980, fraud: 27 },
-  { label: 'Sat', total: 1320, fraud: 6  },
-  { label: 'Sun', total: 980,  fraud: 4  },
-];
-
-const maxTotal = Math.max(...BAR_DATA.map(d => d.total));
-
-/* -------- Sparkline (SVG) -------- */
-const SPARK = [12, 18, 8, 31, 27, 6, 4, 22, 15, 38, 11, 9, 44, 30];
-const sparkMax = Math.max(...SPARK);
-const sparkPoints = SPARK.map((v, i) => {
-  const x = (i / (SPARK.length - 1)) * 340;
-  const y = 60 - (v / sparkMax) * 55;
-  return `${x},${y}`;
-}).join(' ');
-
-/* -------- Risk distribution donut -------- */
-const DONUT = [
-  { label: 'Low',    pct: 68, color: '#00ff41' },
-  { label: 'Medium', pct: 22, color: '#ffcc00' },
-  { label: 'High',   pct: 10, color: '#ff3232' },
-];
-
-const HOUR_DATA = Array.from({ length: 24 }, (_, h) => ({
-  hour: h,
-  count: Math.round(20 + Math.sin((h - 3) * 0.6) * 15 + Math.random() * 8),
-  fraud: Math.round(Math.max(0, Math.sin((h - 2) * 0.5) * 3 + (h >= 1 && h <= 5 ? 4 : 0))),
-}));
-
-const TOP_MERCHANTS = [
-  { name: 'Unknown Merchant', count: 34, risk: 'HIGH' },
-  { name: 'Crypto Exchange XY', count: 28, risk: 'HIGH' },
-  { name: 'InstaKash Wallet', count: 19, risk: 'MEDIUM' },
-  { name: 'QuickLoan App', count: 15, risk: 'MEDIUM' },
-  { name: 'AliMart Online', count: 9,  risk: 'LOW' },
-];
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const riskColorMap = { HIGH: '#ff3232', MEDIUM: '#ffcc00', LOW: '#00ff41' };
+const fraudStatuses = new Set(['flagged', 'blocked']);
+
+function riskFromTransaction(txn) {
+  const status = String(txn.status || '').toLowerCase();
+  if (status === 'blocked' || status === 'flagged') {
+    return 'HIGH';
+  }
+  const score = Number(txn.score || 0);
+  if (score >= 70) {
+    return 'MEDIUM';
+  }
+  return 'LOW';
+}
 
 const Analytics = () => {
   const [activeBar, setActiveBar] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadAnalyticsData() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/v1/transactions/public?page=1&limit=500`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data?.message || 'Failed to fetch analytics data');
+        }
+
+        if (mounted) {
+          setTransactions(Array.isArray(data?.items) ? data.items : []);
+          setError('');
+        }
+      } catch (err) {
+        if (mounted) {
+          setError(err.message || 'Failed to fetch analytics data');
+        }
+      } finally {
+        if (mounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadAnalyticsData();
+    const pollId = setInterval(loadAnalyticsData, 15000);
+
+    return () => {
+      mounted = false;
+      clearInterval(pollId);
+    };
+  }, []);
+
+  const {
+    BAR_DATA,
+    DONUT,
+    HOUR_DATA,
+    TOP_MERCHANTS,
+    SPARK,
+  } = useMemo(() => {
+    const now = Date.now();
+    const fourteenDaysMs = 14 * 24 * 60 * 60 * 1000;
+    const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+
+    const last14FraudPerDay = new Array(14).fill(0);
+    const weeklyTotals = DAY_NAMES.map((label, index) => ({ label, dayIndex: index, total: 0, fraud: 0 }));
+    const hourly = Array.from({ length: 24 }, (_, hour) => ({ hour, count: 0, fraud: 0 }));
+
+    const merchantMap = new Map();
+    const riskCounts = { LOW: 0, MEDIUM: 0, HIGH: 0 };
+
+    transactions.forEach((txn) => {
+      const ts = new Date(txn.time).getTime();
+      if (!Number.isFinite(ts)) {
+        return;
+      }
+
+      const status = String(txn.status || '').toLowerCase();
+      const isFraud = fraudStatuses.has(status);
+      const risk = riskFromTransaction(txn);
+      riskCounts[risk] += 1;
+
+      const date = new Date(ts);
+      const dayDiff = Math.floor((now - ts) / (24 * 60 * 60 * 1000));
+
+      if (dayDiff >= 0 && dayDiff < 14 && isFraud) {
+        const sparkIdx = 13 - dayDiff;
+        last14FraudPerDay[sparkIdx] += 1;
+      }
+
+      if (now - ts <= sevenDaysMs) {
+        const dayIdx = date.getDay();
+        weeklyTotals[dayIdx].total += 1;
+        if (isFraud) {
+          weeklyTotals[dayIdx].fraud += 1;
+        }
+      }
+
+      const hour = date.getHours();
+      hourly[hour].count += 1;
+      if (isFraud) {
+        hourly[hour].fraud += 1;
+      }
+
+      const merchantName = txn.merchantCategory || txn.receiverName || txn.upiRecipient || 'Unknown Merchant';
+      if (!merchantMap.has(merchantName)) {
+        merchantMap.set(merchantName, { name: merchantName, total: 0, fraud: 0, totalScore: 0 });
+      }
+      const bucket = merchantMap.get(merchantName);
+      bucket.total += 1;
+      bucket.totalScore += Number(txn.score || 0);
+      if (isFraud) {
+        bucket.fraud += 1;
+      }
+    });
+
+    const totalForDonut = riskCounts.LOW + riskCounts.MEDIUM + riskCounts.HIGH;
+    const donutData = [
+      { label: 'Low', pct: totalForDonut ? Math.round((riskCounts.LOW / totalForDonut) * 100) : 0, color: '#00ff41' },
+      { label: 'Medium', pct: totalForDonut ? Math.round((riskCounts.MEDIUM / totalForDonut) * 100) : 0, color: '#ffcc00' },
+      { label: 'High', pct: totalForDonut ? Math.round((riskCounts.HIGH / totalForDonut) * 100) : 0, color: '#ff3232' },
+    ];
+
+    const topMerchants = [...merchantMap.values()]
+      .filter((m) => m.fraud > 0)
+      .sort((a, b) => b.fraud - a.fraud)
+      .slice(0, 5)
+      .map((m) => {
+        const avgScore = m.total ? m.totalScore / m.total : 0;
+        const fraudRate = m.total ? m.fraud / m.total : 0;
+        const risk = avgScore >= 70 || fraudRate >= 0.6 ? 'HIGH' : avgScore >= 40 || fraudRate >= 0.3 ? 'MEDIUM' : 'LOW';
+        return { name: m.name, count: m.fraud, risk };
+      });
+
+    return {
+      BAR_DATA: weeklyTotals,
+      DONUT: donutData,
+      HOUR_DATA: hourly,
+      TOP_MERCHANTS: topMerchants,
+      SPARK: last14FraudPerDay,
+    };
+  }, [transactions]);
+
+  const maxTotal = Math.max(...BAR_DATA.map((d) => d.total), 1);
+  const sparkMax = Math.max(...SPARK, 1);
+  const sparkPoints = SPARK.map((v, i) => {
+    const x = (i / Math.max(SPARK.length - 1, 1)) * 340;
+    const y = 60 - (v / sparkMax) * 55;
+    return `${x},${y}`;
+  }).join(' ');
+
+  const prev7 = SPARK.slice(0, 7).reduce((sum, v) => sum + v, 0);
+  const curr7 = SPARK.slice(7).reduce((sum, v) => sum + v, 0);
+  const fraudTrendPct = prev7 ? Math.round(((curr7 - prev7) / prev7) * 100) : (curr7 > 0 ? 100 : 0);
+
+  const topMerchantRows = TOP_MERCHANTS.length
+    ? TOP_MERCHANTS
+    : [{ name: 'No fraud pattern yet', count: 0, risk: 'LOW' }];
 
   return (
     <div className="analytics">
+      {error ? <div className="user-records-error">{error}</div> : null}
+
+      {loading ? <div className="db-alerts">Loading analytics...</div> : null}
 
       {/* ── Row 1: Sparkline + Donut ── */}
       <div className="an-row">
@@ -61,7 +182,7 @@ const Analytics = () => {
               <div className="an-card__title">Fraud incidents — Last 14 days</div>
               <div className="an-card__sub">Rolling daily fraud count</div>
             </div>
-            <div className="an-stat-pill an-stat-pill--red">+12% vs prev</div>
+            <div className="an-stat-pill an-stat-pill--red">{`${fraudTrendPct >= 0 ? '+' : ''}${fraudTrendPct}% vs prev`}</div>
           </div>
           <svg className="an-sparkline" viewBox="0 0 340 70" preserveAspectRatio="none">
             <defs>
@@ -123,7 +244,7 @@ const Analytics = () => {
               })()}
               <text x="60" y="56" textAnchor="middle" fill="#00ff41"
                 fontSize="14" fontWeight="900" fontFamily="Orbitron">
-                {DONUT.find(d=>d.label==='Low').pct}%
+                {DONUT.find(d=>d.label==='Low')?.pct || 0}%
               </text>
               <text x="60" y="70" textAnchor="middle" fill="rgba(232,255,232,.5)"
                 fontSize="7" fontFamily="Share Tech Mono">
@@ -172,7 +293,7 @@ const Analytics = () => {
                   <div className="an-bar an-bar--total"
                     style={{ height: `${(d.total / maxTotal) * 100}%` }} />
                   <div className="an-bar an-bar--fraud"
-                    style={{ height: `${(d.fraud / maxTotal) * 100 * 6}%` }} />
+                      style={{ height: `${(d.fraud / maxTotal) * 100}%` }} />
                 </div>
                 <div className="an-bar-label">{d.label}</div>
               </div>
@@ -190,7 +311,7 @@ const Analytics = () => {
                 style={{
                   background: h.fraud > 3
                     ? `rgba(255,50,50,${Math.min(h.fraud / 6, 0.8)})`
-                    : `rgba(0,255,65,${Math.min(h.count / 35, 0.3)})`,
+                    : `rgba(0,255,65,${Math.min(h.count / 20, 0.3)})`,
                 }}
               >
               </div>
@@ -222,7 +343,7 @@ const Analytics = () => {
               </tr>
             </thead>
             <tbody>
-              {TOP_MERCHANTS.map((m, i) => (
+              {topMerchantRows.map((m, i) => (
                 <tr key={i}>
                   <td className="db-table__txn-id">{String(i + 1).padStart(2, '0')}</td>
                   <td>{m.name}</td>
@@ -235,7 +356,7 @@ const Analytics = () => {
                   <td>
                     <div className="an-mini-bar">
                       <div style={{
-                        width: `${(m.count / 34) * 100}%`,
+                        width: `${Math.min((m.count / Math.max(topMerchantRows[0]?.count || 1, 1)) * 100, 100)}%`,
                         background: riskColorMap[m.risk],
                         boxShadow: `0 0 6px ${riskColorMap[m.risk]}`,
                       }}/>

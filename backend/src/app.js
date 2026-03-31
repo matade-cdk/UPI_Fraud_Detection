@@ -6,6 +6,7 @@ const authRoutes = require("./routes/auth.routes");
 const transactionRoutes = require("./routes/transaction.routes");
 const adminRoutes = require("./routes/admin.routes");
 const chatRoutes = require("./routes/chat.routes");
+const mlRoutes = require("./routes/ml.routes");
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/transactions", transactionRoutes);
 app.use("/api/v1/admin", adminRoutes);
 app.use("/api/v1/chat", chatRoutes);
+app.use("/api/v1/ml", mlRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Route not found" });

@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   StyleSheet,
   Text,
@@ -15,34 +16,42 @@ import { assessTransactionRisk } from "../../services/fraudApi";
 
 const keypad = ["1", "2", "3", "4", "5", "6", "7", "8", "9", ".", "0", "back"];
 
-function initialFromName(name = "?") {
-  return name
-    .split(" ")
-    .map((v) => v[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
 export default function PaymentScreen({ navigation, route }) {
-  const recipient = route?.params?.recipient || {
-    name: "",
-    vpa: "",
-    bank: "UPI",
-    trustScore: 70,
-  };
-  const actionType = route?.params?.actionType || "Send";
+  const recipient = route?.params?.recipient || { trustScore: 70 };
+  const [transactionType, setTransactionType] = useState("TRANSFER");
 
-  const [receiverName, setReceiverName] = useState(recipient.name || "");
-  const [receiverUpi, setReceiverUpi] = useState(recipient.vpa || "");
+  const [transactionIdInput, setTransactionIdInput] = useState("");
   const [amount, setAmount] = useState("");
-  const [reason, setReason] = useState("");
-  const [location, setLocation] = useState("Bengaluru");
+  const [step, setStep] = useState(String(new Date().getHours()));
+  const [oldBalanceOrg, setOldBalanceOrg] = useState("");
+  const [newBalanceOrg, setNewBalanceOrg] = useState("");
+  const [oldBalanceDest, setOldBalanceDest] = useState("");
+  const [newBalanceDest, setNewBalanceDest] = useState("");
   const [checking, setChecking] = useState(false);
 
+  const parsedAmount = Number(amount || 0);
+  const parsedOldBalanceOrg = Number(oldBalanceOrg || 0);
+  const parsedNewBalanceOrg = Number(newBalanceOrg || 0);
+  const parsedOldBalanceDest = Number(oldBalanceDest || 0);
+  const parsedNewBalanceDest = Number(newBalanceDest || 0);
+  const parsedStep = Number(step || 0);
+
+  const hasDatasetFields =
+    transactionIdInput.trim().length > 0 &&
+    Number.isFinite(parsedStep) &&
+    parsedStep >= 0 &&
+    Number.isFinite(parsedOldBalanceOrg) &&
+    parsedOldBalanceOrg >= 0 &&
+    Number.isFinite(parsedNewBalanceOrg) &&
+    parsedNewBalanceOrg >= 0 &&
+    Number.isFinite(parsedOldBalanceDest) &&
+    parsedOldBalanceDest >= 0 &&
+    Number.isFinite(parsedNewBalanceDest) &&
+    parsedNewBalanceDest >= 0;
+
   const canProceed = useMemo(
-    () => Number(amount || 0) > 0 && receiverName.trim().length > 1 && receiverUpi.trim().length > 3,
-    [amount, receiverName, receiverUpi]
+    () => parsedAmount > 0 && hasDatasetFields,
+    [parsedAmount, hasDatasetFields]
   );
 
   const onKeyPress = (key) => {
@@ -72,76 +81,97 @@ export default function PaymentScreen({ navigation, route }) {
       return;
     }
 
+    const expectedNewOrg = parsedOldBalanceOrg - parsedAmount;
+
+    if (expectedNewOrg < 0) {
+      Alert.alert("Insufficient balance", "Amount is higher than old balance for this account.");
+      return;
+    }
+
     setChecking(true);
+    const transactionId = transactionIdInput.trim() || `TXN-${Date.now()}`;
     const payload = {
-      transactionId: `TXN-${Date.now()}`,
+      transactionId,
       userId: "u_current",
-      amount: Number(amount),
-      upiRecipient: receiverUpi.trim(),
+      amount: parsedAmount,
+      upiRecipient: "manual@upi",
       deviceFingerprint: "mobile-device-fp",
       ipAddress: "0.0.0.0",
       geo: { lat: 12.97, lng: 77.59 },
       timestamp: new Date().toISOString(),
       trustScore: recipient.trustScore || 70,
-      reason,
-      location,
-      actionType,
+      reason: "Manual transfer dataset entry",
+      location: "Unknown",
+      actionType: "Transfer",
+      step: parsedStep,
+      transactionType,
+      oldbalanceOrg: parsedOldBalanceOrg,
+      newbalanceOrig: parsedNewBalanceOrg,
+      oldbalanceDest: parsedOldBalanceDest,
+      newbalanceDest: parsedNewBalanceDest,
+      errorBalanceOrg: parsedAmount - (parsedOldBalanceOrg - parsedNewBalanceOrg),
+      errorBalanceDest: parsedAmount - (parsedNewBalanceDest - parsedOldBalanceDest),
     };
 
     const result = await assessTransactionRisk(payload);
     setChecking(false);
 
+    const riskScore = Number(result.riskScore || 0);
+    if (Boolean(result.risky) || riskScore > 0.5) {
+      Alert.alert("Failed transfer", "Risk is above 50%. Suspicious activity detected.");
+      return;
+    }
+
     navigation.navigate("PaymentDecision", {
       transaction: {
-        amount: Number(amount),
-        receiverName: receiverName.trim(),
-        upiId: receiverUpi.trim(),
-        trustScore: recipient.trustScore || 70,
-        isFraudulent: Boolean(result.risky),
+        amount: parsedAmount,
+        receiverName: "Manual Transfer",
+        upiId: "manual@upi",
+        trustScore: Math.round((1 - Number(result.riskScore || 0)) * 100),
+        riskScore,
+        riskLevel: result.riskLevel || "LOW",
+        isFraudulent: false,
         fraudReason: result.reason || "No suspicious pattern detected.",
-        txnId: payload.transactionId,
+        txnId: transactionId,
         timestamp: new Date(),
-        location,
-        reason,
+        location: payload.location,
+        reason: payload.reason,
+        step: parsedStep,
+        oldbalanceOrg: parsedOldBalanceOrg,
+        newbalanceOrig: parsedNewBalanceOrg,
+        oldbalanceDest: parsedOldBalanceDest,
+        newbalanceDest: parsedNewBalanceDest,
+        mlSnapshot: {
+          transactionId,
+          step: parsedStep,
+          transactionType,
+          oldbalanceOrg: parsedOldBalanceOrg,
+          newbalanceOrig: parsedNewBalanceOrg,
+          oldbalanceDest: parsedOldBalanceDest,
+          newbalanceDest: parsedNewBalanceDest,
+        },
       },
     });
   };
 
   return (
-    <ScreenContainer scroll={false}>
+    <ScreenContainer>
       <View style={styles.screen}>
         <View style={styles.headerRow}>
           <Pressable onPress={() => navigation.goBack()} style={styles.backBtn}>
             <MaterialCommunityIcons name="arrow-left" size={20} color={appColors.text} />
           </Pressable>
-          <Text style={styles.headerTitle}>Paying money</Text>
+          <Text style={styles.headerTitle}>New Transfer</Text>
           <View style={styles.headerSpacer} />
         </View>
 
         <View style={styles.recipientArea}>
           <View style={styles.avatar}>
-            <Text style={styles.avatarText}>{initialFromName(receiverName || "?")}</Text>
+            <Text style={styles.avatarText}>ML</Text>
           </View>
-          <Text style={styles.recipientName}>{receiverName || "Enter Receiver"}</Text>
-          <Text style={styles.recipientMeta}>{receiverUpi || "Enter UPI ID"}</Text>
+          <Text style={styles.recipientName}>Fraud Dataset Input</Text>
+          <Text style={styles.recipientMeta}>Enter transfer features for analytics</Text>
         </View>
-
-        <TextInput
-          value={receiverName}
-          onChangeText={setReceiverName}
-          placeholder="Receiver name"
-          placeholderTextColor="rgba(231,255,233,0.4)"
-          style={styles.reasonInput}
-        />
-
-        <TextInput
-          value={receiverUpi}
-          onChangeText={setReceiverUpi}
-          placeholder="Receiver UPI ID"
-          placeholderTextColor="rgba(231,255,233,0.4)"
-          style={styles.reasonInput}
-          autoCapitalize="none"
-        />
 
         <View style={styles.amountBox}>
           <Text style={styles.currency}>Rs</Text>
@@ -154,20 +184,74 @@ export default function PaymentScreen({ navigation, route }) {
           />
         </View>
 
+        <Text style={styles.formSectionTitle}>ML Dataset Details</Text>
+
         <TextInput
-          value={reason}
-          onChangeText={setReason}
-          placeholder="Enter reason"
+          value={transactionIdInput}
+          onChangeText={setTransactionIdInput}
+          placeholder="Transaction_ID"
           placeholderTextColor="rgba(231,255,233,0.4)"
           style={styles.reasonInput}
+          autoCapitalize="none"
         />
 
         <TextInput
-          value={location}
-          onChangeText={setLocation}
-          placeholder="Enter location"
+          value={step}
+          onChangeText={setStep}
+          placeholder="Step (hour index)"
           placeholderTextColor="rgba(231,255,233,0.4)"
           style={styles.reasonInput}
+          keyboardType="number-pad"
+        />
+
+        <View style={styles.typeRow}>
+          {["CASH_IN", "CASH_OUT", "DEBIT", "PAYMENT", "TRANSFER"].map((typeOption) => (
+            <Pressable
+              key={typeOption}
+              style={[styles.typePill, transactionType === typeOption && styles.typePillActive]}
+              onPress={() => setTransactionType(typeOption)}
+            >
+              <Text style={[styles.typePillText, transactionType === typeOption && styles.typePillTextActive]}>
+                {typeOption}
+              </Text>
+            </Pressable>
+          ))}
+        </View>
+
+        <TextInput
+          value={oldBalanceOrg}
+          onChangeText={setOldBalanceOrg}
+          placeholder="Old balance"
+          placeholderTextColor="rgba(231,255,233,0.4)"
+          style={styles.reasonInput}
+          keyboardType="decimal-pad"
+        />
+
+        <TextInput
+          value={newBalanceOrg}
+          onChangeText={setNewBalanceOrg}
+          placeholder="New balance"
+          placeholderTextColor="rgba(231,255,233,0.4)"
+          style={styles.reasonInput}
+          keyboardType="decimal-pad"
+        />
+
+        <TextInput
+          value={oldBalanceDest}
+          onChangeText={setOldBalanceDest}
+          placeholder="Old balance destination"
+          placeholderTextColor="rgba(231,255,233,0.4)"
+          style={styles.reasonInput}
+          keyboardType="decimal-pad"
+        />
+
+        <TextInput
+          value={newBalanceDest}
+          onChangeText={setNewBalanceDest}
+          placeholder="New balance destination"
+          placeholderTextColor="rgba(231,255,233,0.4)"
+          style={styles.reasonInput}
+          keyboardType="decimal-pad"
         />
 
         <View style={styles.actionsRow}>
@@ -289,6 +373,37 @@ const styles = StyleSheet.create({
     fontSize: 14,
     paddingHorizontal: 14,
     paddingVertical: 12,
+  },
+  formSectionTitle: {
+    color: appColors.text,
+    fontWeight: "700",
+    fontSize: 14,
+    marginTop: 4,
+  },
+  typeRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  typePill: {
+    borderWidth: 1,
+    borderColor: appColors.border,
+    borderRadius: 999,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
+    backgroundColor: "#0b1813",
+  },
+  typePillActive: {
+    backgroundColor: appColors.primary,
+    borderColor: appColors.primary,
+  },
+  typePillText: {
+    color: appColors.textMuted,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  typePillTextActive: {
+    color: "#03280f",
   },
   actionsRow: {
     alignItems: "flex-end",

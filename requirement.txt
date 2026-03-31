@@ -1,0 +1,83 @@
+VAJRA PROJECT - REQUIREMENTS AND SETUP (OTHER PC)
+
+1) SOFTWARE REQUIRED
+- Node.js 20.x LTS (or newer)
+- npm 10.x (comes with Node)
+- MongoDB Atlas connection string (or local MongoDB)
+- Expo Go app (for mobile testing)
+- Git (optional, for cloning)
+
+2) PROJECT FOLDERS
+- backend (Express + MongoDB API)
+- client (React web dashboard)
+- mobile (React Native Expo app)
+
+3) BACKEND SETUP
+Path: backend/
+
+Commands:
+- npm install
+
+Environment file:
+- Copy backend/.env.example to backend/.env
+- Update values in backend/.env:
+  PORT=5000
+  MONGO_URI=<your_mongodb_uri>
+  MONGO_DB_NAME=upi_fraud_detection
+  JWT_SECRET=<your_secret>
+  JWT_EXPIRES_IN=7d
+  ALLOW_PUBLIC_USERS_ENDPOINT=false
+  GEMINI_API_KEY=<optional>
+  GEMINI_MODEL=gemini-2.5-flash
+
+Run backend:
+- npm start
+(Dev mode optional: npm run dev)
+
+4) CLIENT (WEB) SETUP
+Path: client/
+
+Commands:
+- npm install
+- npm start
+
+Optional env (if backend is not localhost:5000):
+- Create client/.env with:
+  REACT_APP_API_BASE_URL=http://localhost:5000
+
+Web app default:
+- http://localhost:3000
+
+5) MOBILE (EXPO) SETUP
+Path: mobile/
+
+Commands:
+- npm install
+- npm run start
+
+Optional runs:
+- npm run android
+- npm run ios
+- npm run web
+
+6) START ORDER (RECOMMENDED)
+Open 3 terminals from project root:
+- Terminal 1:
+  cd backend
+  npm start
+- Terminal 2:
+  cd client
+  npm start
+- Terminal 3:
+  cd mobile
+  npm run start
+
+7) QUICK CHECK
+- Backend health: http://localhost:5000/api/v1/health
+- Client loads on http://localhost:3000
+- Mobile Expo QR appears in terminal
+
+8) NOTES
+- If ports are busy, stop other processes or change PORT.
+- If API calls fail from web/mobile, verify API base URL points to backend.
+- If using another network/device for mobile, ensure backend URL is reachable from that device.

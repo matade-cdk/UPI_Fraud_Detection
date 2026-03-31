@@ -26,12 +26,88 @@ async function getTransactions(req, res) {
         status: t.status,
         location: t.location,
         reason: t.reason,
+        merchantCategory: t.merchantCategory,
+        deviceId: t.deviceId,
+        fraudLabel: t.fraudLabel,
+        step: t.step,
+        oldbalanceOrg: t.oldbalanceOrg,
+        newbalanceOrig: t.newbalanceOrig,
+        oldbalanceDest: t.oldbalanceDest,
+        newbalanceDest: t.newbalanceDest,
         time: t.time,
       })),
       pagination: { page, limit, total },
     });
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch transactions", error: error.message });
+  }
+}
+
+async function getPublicTransactions(req, res) {
+  try {
+    const page = Math.max(parseInt(req.query.page || "1", 10), 1);
+    const limit = Math.min(Math.max(parseInt(req.query.limit || "100", 10), 1), 500);
+    const skip = (page - 1) * limit;
+
+    const [items, total] = await Promise.all([
+      Transaction.find({}).sort({ time: -1 }).skip(skip).limit(limit).lean(),
+      Transaction.countDocuments({}),
+    ]);
+
+    return res.json({
+      items: items.map((t) => ({
+        id: t.txnId,
+        userId: t.userId,
+        receiverName: t.receiverName,
+        upiRecipient: t.upiRecipient,
+        amount: t.amount,
+        transactionType: t.transactionType,
+        currency: t.currency,
+        score: t.score,
+        status: t.status,
+        location: t.location,
+        reason: t.reason,
+        merchantCategory: t.merchantCategory,
+        deviceId: t.deviceId,
+        fraudLabel: t.fraudLabel,
+        step: t.step,
+        oldbalanceOrg: t.oldbalanceOrg,
+        newbalanceOrig: t.newbalanceOrig,
+        oldbalanceDest: t.oldbalanceDest,
+        newbalanceDest: t.newbalanceDest,
+        time: t.time,
+      })),
+      pagination: { page, limit, total },
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch public transactions", error: error.message });
+  }
+}
+
+async function getFraudAlerts(req, res) {
+  try {
+    const limit = Math.min(Math.max(parseInt(req.query.limit || "20", 10), 1), 50);
+
+    const items = await Transaction.find({ status: { $in: ["flagged", "blocked"] } })
+      .sort({ time: -1 })
+      .limit(limit)
+      .lean();
+
+    return res.json({
+      items: items.map((t) => ({
+        id: t.txnId,
+        receiverName: t.receiverName,
+        upiRecipient: t.upiRecipient,
+        amount: t.amount,
+        status: t.status,
+        score: t.score,
+        reason: t.reason,
+        fraudLabel: t.fraudLabel,
+        time: t.time,
+      })),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: "Failed to fetch fraud alerts", error: error.message });
   }
 }
 
@@ -56,6 +132,14 @@ async function createTransaction(req, res) {
       status: body.status || "success",
       location: body.location || "Unknown",
       reason: body.reason || "",
+      merchantCategory: body.merchantCategory || "",
+      deviceId: body.deviceId || "",
+      fraudLabel: body.fraudLabel || "",
+      step: Number(body.step || 0),
+      oldbalanceOrg: Number(body.oldbalanceOrg || 0),
+      newbalanceOrig: Number(body.newbalanceOrig || 0),
+      oldbalanceDest: Number(body.oldbalanceDest || 0),
+      newbalanceDest: Number(body.newbalanceDest || 0),
       time: body.time ? new Date(body.time) : new Date(),
     };
 
@@ -77,6 +161,14 @@ async function createTransaction(req, res) {
       status: saved.status,
       location: saved.location,
       reason: saved.reason,
+      merchantCategory: saved.merchantCategory,
+      deviceId: saved.deviceId,
+      fraudLabel: saved.fraudLabel,
+      step: saved.step,
+      oldbalanceOrg: saved.oldbalanceOrg,
+      newbalanceOrig: saved.newbalanceOrig,
+      oldbalanceDest: saved.oldbalanceDest,
+      newbalanceDest: saved.newbalanceDest,
       time: saved.time,
     });
   } catch (error) {
@@ -108,6 +200,14 @@ async function getMyTransactions(req, res) {
         status: t.status,
         location: t.location,
         reason: t.reason,
+        merchantCategory: t.merchantCategory,
+        deviceId: t.deviceId,
+        fraudLabel: t.fraudLabel,
+        step: t.step,
+        oldbalanceOrg: t.oldbalanceOrg,
+        newbalanceOrig: t.newbalanceOrig,
+        oldbalanceDest: t.oldbalanceDest,
+        newbalanceDest: t.newbalanceDest,
         time: t.time,
       })),
       pagination: { page, limit, total },
@@ -155,6 +255,14 @@ async function getTransactionsByPublicUserId(req, res) {
         status: t.status,
         location: t.location,
         reason: t.reason,
+        merchantCategory: t.merchantCategory,
+        deviceId: t.deviceId,
+        fraudLabel: t.fraudLabel,
+        step: t.step,
+        oldbalanceOrg: t.oldbalanceOrg,
+        newbalanceOrig: t.newbalanceOrig,
+        oldbalanceDest: t.oldbalanceDest,
+        newbalanceDest: t.newbalanceDest,
         time: t.time,
       })),
       pagination: { page, limit, total },
@@ -164,4 +272,11 @@ async function getTransactionsByPublicUserId(req, res) {
   }
 }
 
-module.exports = { getTransactions, createTransaction, getMyTransactions, getTransactionsByPublicUserId };
+module.exports = {
+  getFraudAlerts,
+  getPublicTransactions,
+  getTransactions,
+  createTransaction,
+  getMyTransactions,
+  getTransactionsByPublicUserId,
+};

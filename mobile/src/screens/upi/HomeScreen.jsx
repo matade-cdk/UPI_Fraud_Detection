@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 
 import ScreenContainer from "../../components/ScreenContainer";
 import AssistantSheet from "../../components/AssistantSheet";
@@ -17,6 +18,7 @@ function formatTime(iso) {
 }
 
 export default function HomeScreen({ navigation }) {
+  const { t } = useTranslation();
   const { walletSummary, transactions } = useTransactions();
 
   const recent = transactions.slice(0, 6);
@@ -42,27 +44,29 @@ export default function HomeScreen({ navigation }) {
   return (
     <ScreenContainer>
       <LinearGradient colors={["#12a64f", "#0b7c39"]} style={styles.balanceCard}>
-        <Text style={styles.balanceLabel}>Total Balance</Text>
+        <Text style={styles.balanceLabel}>{t("home.totalBalance")}</Text>
         <Text style={styles.balanceValue}>{formatCurrency(walletSummary.totalBalance)}</Text>
         <View style={styles.balanceStats}>
           <View>
-            <Text style={styles.balanceSub}>Income</Text>
+            <Text style={styles.balanceSub}>{t("home.income")}</Text>
             <Text style={styles.balanceSubValue}>{formatCurrency(walletSummary.income)}</Text>
           </View>
           <View>
-            <Text style={styles.balanceSub}>Expense</Text>
+            <Text style={styles.balanceSub}>{t("home.expense")}</Text>
             <Text style={styles.balanceSubValue}>{formatCurrency(walletSummary.expense)}</Text>
           </View>
         </View>
-        <Text style={styles.openingText}>Opening balance: {formatCurrency(walletSummary.openingBalance)}</Text>
+        <Text style={styles.openingText}>
+          {t("home.openingBalance", { value: formatCurrency(walletSummary.openingBalance) })}
+        </Text>
       </LinearGradient>
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Send Money</Text>
+        <Text style={styles.sectionTitle}>{t("home.sendMoney")}</Text>
       </View>
 
       <Pressable style={styles.newTransferBtn} onPress={() => navigation.navigate("Payment", { actionType: "Transfer" })}>
-        <Text style={styles.newTransferText}>New Transfer</Text>
+        <Text style={styles.newTransferText}>{t("home.newTransfer")}</Text>
       </Pressable>
 
       {recentReceivers.length ? (
@@ -86,7 +90,7 @@ export default function HomeScreen({ navigation }) {
       ) : null}
 
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>Transaction History</Text>
+        <Text style={styles.sectionTitle}>{t("home.transactionHistory")}</Text>
       </View>
 
       <View style={styles.historyCard}>
@@ -100,12 +104,12 @@ export default function HomeScreen({ navigation }) {
               </View>
               <View style={styles.rightCol}>
                 <Text style={styles.historyAmount}>- {formatCurrency(txn.amount)}</Text>
-                <Text style={styles.historyMeta}>{txn.location || "Unknown"}</Text>
+                <Text style={styles.historyMeta}>{txn.location || t("home.unknown")}</Text>
               </View>
             </View>
           ))
         ) : (
-          <Text style={styles.emptyText}>No transaction history yet. Start by sending money.</Text>
+          <Text style={styles.emptyText}>{t("home.emptyHistory")}</Text>
         )}
       </View>
 

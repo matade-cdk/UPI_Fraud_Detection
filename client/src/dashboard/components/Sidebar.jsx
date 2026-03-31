@@ -10,10 +10,6 @@ const NAV_GROUPS = [
         icon: <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="1.5" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="10" y="1.5" width="5.5" height="5.5" rx="1.2"/><rect x="1.5" y="10" width="5.5" height="5.5" rx="1.2"/><rect x="10" y="10" width="5.5" height="5.5" rx="1.2"/></svg>,
       },
       {
-        label: 'Analytics', to: '/dashboard/analytics',
-        icon: <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.5"><polyline points="2,14 6,8 10,11 14,5"/><circle cx="14" cy="5" r="1.5" fill="currentColor" stroke="none"/></svg>,
-      },
-      {
         label: 'Transactions', to: '/dashboard/transactions',
         icon: <svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="2" y="5" width="13" height="10" rx="1.5"/><path d="M5 5V4a3.5 3.5 0 017 0v1"/><path d="M8.5 9v3"/></svg>,
       },

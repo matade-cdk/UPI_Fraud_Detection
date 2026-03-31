@@ -24,7 +24,7 @@ export default function RootNavigator() {
       <Stack.Screen
         name="Landing"
         component={LandingScreen}
-        options={{ title: "UPIGuard", headerShadowVisible: false }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="Auth"

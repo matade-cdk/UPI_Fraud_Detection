@@ -1,0 +1,74 @@
+{
+  "auth": {
+    "createAccount": "Crear cuenta",
+    "welcomeBack": "Bienvenido de nuevo",
+    "signupSubtitle": "Registrate con nombre de usuario, correo y contrasena",
+    "loginSubtitle": "Inicia sesion con correo y contrasena",
+    "brandSub": "Acceso seguro",
+    "login": "Iniciar sesion",
+    "signUp": "Registrarse",
+    "username": "Nombre de usuario",
+    "email": "Correo",
+    "password": "Contrasena",
+    "enterUsername": "Ingresa nombre de usuario",
+    "enterPassword": "Ingresa contrasena",
+    "createAccountCta": "Crear cuenta",
+    "usernameError": "El nombre de usuario debe tener al menos 2 caracteres.",
+    "emailError": "Ingresa un correo electronico valido.",
+    "passwordError": "La contrasena debe tener al menos 6 caracteres.",
+    "failed": "Autenticacion fallida"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "insights": "Analitica",
+    "transactions": "Transacciones anteriores",
+    "transactionsShort": "Anteriores",
+    "profile": "Perfil",
+    "scan": "Escanear"
+  },
+  "home": {
+    "totalBalance": "Saldo total",
+    "income": "Ingresos",
+    "expense": "Gastos",
+    "openingBalance": "Saldo inicial: {{value}}",
+    "sendMoney": "Enviar dinero",
+    "newTransfer": "Nueva transferencia",
+    "transactionHistory": "Historial de transacciones",
+    "unknown": "Desconocido",
+    "emptyHistory": "Aun no hay historial. Comienza enviando dinero."
+  },
+  "insights": {
+    "title": "Analitica e informacion",
+    "subtitle": "Tendencia de gasto en vivo y resumen de riesgo desde tus transacciones vinculadas al backend.",
+    "totalExpense": "Gasto total",
+    "safetyScore": "Puntuacion de seguridad",
+    "transactions": "Transacciones",
+    "flagged": "Marcadas",
+    "sevenDayGraph": "Grafico de gastos de 7 dias"
+  },
+  "cards": {
+    "title": "Historial de transacciones",
+    "subtitle": "Actividad en vivo vinculada con backend.",
+    "unknown": "Desconocido",
+    "empty": "Aun no hay transacciones."
+  },
+  "profile": {
+    "title": "Perfil",
+    "subtitle": "Detalles de tu cuenta vinculados al usuario autenticado.",
+    "name": "Nombre",
+    "email": "Correo",
+    "accountNumber": "Numero de cuenta",
+    "ifsc": "IFSC",
+    "language": "Idioma",
+    "languageHint": "Elige el idioma preferido de la app"
+  },
+  "languages": {
+    "en": "Ingles",
+    "hi": "Hindi",
+    "kok": "Konkani",
+    "kn": "Kannada",
+    "mr": "Marati",
+    "fr": "Frances",
+    "es": "Espanol"
+  }
+}

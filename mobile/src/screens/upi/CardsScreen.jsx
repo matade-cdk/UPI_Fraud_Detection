@@ -1,5 +1,6 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import ScreenContainer from "../../components/ScreenContainer";
 import { appColors } from "../../constants/theme";
@@ -10,13 +11,14 @@ function formatCurrency(value) {
 }
 
 export default function CardsScreen() {
+  const { t } = useTranslation();
   const { transactions } = useTransactions();
 
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>Transaction History</Text>
-        <Text style={styles.text}>Live activity linked with backend.</Text>
+        <Text style={styles.title}>{t("cards.title")}</Text>
+        <Text style={styles.text}>{t("cards.subtitle")}</Text>
       </View>
 
       <View style={styles.feedWrap}>
@@ -26,7 +28,7 @@ export default function CardsScreen() {
               <View style={styles.txnLeft}>
                 <Text style={styles.txnReceiver}>{txn.receiverName}</Text>
                 <Text style={styles.txnTime}>{new Date(txn.timestamp).toLocaleString()}</Text>
-                <Text style={styles.txnTime}>{txn.location || "Unknown"}</Text>
+                <Text style={styles.txnTime}>{txn.location || t("cards.unknown")}</Text>
               </View>
               <View style={styles.txnRight}>
                 <Text style={styles.txnAmount}>{formatCurrency(txn.amount)}</Text>
@@ -35,7 +37,7 @@ export default function CardsScreen() {
             </View>
           ))
         ) : (
-          <Text style={styles.emptyText}>No transactions yet.</Text>
+          <Text style={styles.emptyText}>{t("cards.empty")}</Text>
         )}
       </View>
     </ScreenContainer>

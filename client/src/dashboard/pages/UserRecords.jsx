@@ -280,6 +280,9 @@ const UserRecords = () => {
                   <th>ID</th>
                   <th>Receiver</th>
                   <th>Amount</th>
+                  <th>Merchant Category</th>
+                  <th>Device ID</th>
+                  <th>Fraud Label</th>
                   <th>Status</th>
                   <th>Time</th>
                 </tr>
@@ -290,6 +293,9 @@ const UserRecords = () => {
                     <td className="db-table__txn-id">{txn.id}</td>
                     <td>{txn.receiverName}</td>
                     <td className="db-table__amount">{formatCurrency(txn.amount)}</td>
+                    <td>{txn.merchantCategory || '-'}</td>
+                    <td>{txn.deviceId || '-'}</td>
+                    <td>{txn.fraudLabel || '-'}</td>
                     <td>
                       <span className={`db-badge db-badge--${txn.status === 'success' ? 'low' : txn.status === 'flagged' ? 'medium' : 'high'}`}>
                         {txn.status}
@@ -300,7 +306,7 @@ const UserRecords = () => {
                 ))}
                 {!loadingSummary && !(summary?.recentTransactions || []).length ? (
                   <tr>
-                    <td colSpan="5" className="user-records-empty">No transactions for this user.</td>
+                    <td colSpan="8" className="user-records-empty">No transactions for this user.</td>
                   </tr>
                 ) : null}
               </tbody>

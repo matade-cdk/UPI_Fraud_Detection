@@ -8,6 +8,7 @@ import RootNavigator from "./src/navigation/RootNavigator";
 import { appColors } from "./src/constants/theme";
 import { AuthProvider } from "./src/context/AuthContext";
 import { TransactionsProvider } from "./src/context/TransactionsContext";
+import "./src/i18n";
 
 const navTheme = {
   ...DefaultTheme,

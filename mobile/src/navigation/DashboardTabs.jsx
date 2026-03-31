@@ -2,6 +2,7 @@ import React from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { useTranslation } from "react-i18next";
 
 import HomeScreen from "../screens/upi/HomeScreen";
 import InsightsScreen from "../screens/upi/InsightsScreen";
@@ -12,12 +13,12 @@ import { appColors } from "../constants/theme";
 
 const Tab = createBottomTabNavigator();
 
-const tabs = [
-  { name: "Home", component: HomeScreen, icon: "home-outline" },
-  { name: "Insights", component: InsightsScreen, icon: "chart-line" },
-  { name: "Previous Transactions", component: CardsScreen, icon: "history" },
-  { name: "Profile", component: ProfileScreen, icon: "account-outline" },
-];
+const tabConfig = {
+  HomeTab: { component: HomeScreen, icon: "home-outline", labelKey: "tabs.home" },
+  InsightsTab: { component: InsightsScreen, icon: "chart-line", labelKey: "tabs.insights" },
+  TransactionsTab: { component: CardsScreen, icon: "history", labelKey: "tabs.transactions" },
+  ProfileTab: { component: ProfileScreen, icon: "account-outline", labelKey: "tabs.profile" },
+};
 
 function ScanTabButton({ onPress }) {
   return (
@@ -30,12 +31,14 @@ function ScanTabButton({ onPress }) {
 }
 
 function TabsOnly() {
+  const { t } = useTranslation();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarIcon: ({ color, size }) => {
-          const conf = tabs.find((t) => t.name === route.name);
+          const conf = tabConfig[route.name];
           return <MaterialCommunityIcons name={conf?.icon || "circle"} size={size} color={color} />;
         },
         tabBarActiveTintColor: appColors.primary,
@@ -53,23 +56,39 @@ function TabsOnly() {
         },
       })}
     >
-      <Tab.Screen name={tabs[0].name} component={tabs[0].component} />
-      <Tab.Screen name={tabs[1].name} component={tabs[1].component} />
       <Tab.Screen
-        name="Scan"
+        name="HomeTab"
+        component={tabConfig.HomeTab.component}
+        options={{ title: t(tabConfig.HomeTab.labelKey), tabBarLabel: t(tabConfig.HomeTab.labelKey) }}
+      />
+      <Tab.Screen
+        name="InsightsTab"
+        component={tabConfig.InsightsTab.component}
+        options={{ title: t(tabConfig.InsightsTab.labelKey), tabBarLabel: t(tabConfig.InsightsTab.labelKey) }}
+      />
+      <Tab.Screen
+        name="ScanTab"
         component={ScanQrScreen}
         options={{
           tabBarLabel: "",
+          title: t("tabs.scan"),
           tabBarIcon: () => null,
           tabBarButton: (props) => <ScanTabButton {...props} />,
         }}
       />
       <Tab.Screen
-        name={tabs[2].name}
-        component={tabs[2].component}
-        options={{ tabBarLabel: "Previous" }}
+        name="TransactionsTab"
+        component={tabConfig.TransactionsTab.component}
+        options={{
+          title: t(tabConfig.TransactionsTab.labelKey),
+          tabBarLabel: t("tabs.transactionsShort"),
+        }}
       />
-      <Tab.Screen name={tabs[3].name} component={tabs[3].component} />
+      <Tab.Screen
+        name="ProfileTab"
+        component={tabConfig.ProfileTab.component}
+        options={{ title: t(tabConfig.ProfileTab.labelKey), tabBarLabel: t(tabConfig.ProfileTab.labelKey) }}
+      />
     </Tab.Navigator>
   );
 }

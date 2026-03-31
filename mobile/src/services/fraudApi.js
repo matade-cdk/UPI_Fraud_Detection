@@ -15,6 +15,22 @@ function withTimeout(ms) {
   return { controller, timeoutId };
 }
 
+function asBoolean(value) {
+  if (typeof value === "boolean") {
+    return value;
+  }
+  if (typeof value === "string") {
+    const normalized = value.trim().toLowerCase();
+    if (["true", "1", "yes"].includes(normalized)) {
+      return true;
+    }
+    if (["false", "0", "no", ""].includes(normalized)) {
+      return false;
+    }
+  }
+  return Boolean(value);
+}
+
 export async function assessTransactionRisk(payload) {
   const { controller, timeoutId } = withTimeout(3500);
 
@@ -33,12 +49,15 @@ export async function assessTransactionRisk(payload) {
     }
 
     const data = await response.json();
+    const riskScore = Number(data.riskScore || 0);
+    const anomaly = asBoolean(data.anomaly);
+    const highRiskLevel = String(data.riskLevel || "").toUpperCase() === "HIGH";
 
     return {
       source: "api",
-      risky: data.riskLevel === "HIGH" || Number(data.riskScore || 0) >= 0.8,
+      risky: anomaly || highRiskLevel || riskScore >= 0.8,
       riskLevel: data.riskLevel || "LOW",
-      riskScore: Number(data.riskScore || 0),
+      riskScore,
       reason: Array.isArray(data.reasons) && data.reasons.length
         ? data.reasons.join(", ")
         : "Model flagged this transaction as potentially suspicious.",

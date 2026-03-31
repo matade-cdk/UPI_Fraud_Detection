@@ -22,12 +22,22 @@ export default function PaymentDecisionScreen({ navigation, route }) {
       receiverName: incoming.receiverName || "Unknown",
       upiId: incoming.upiId || "unknown@upi",
       trustScore: Number(incoming.trustScore || 0),
+      riskScore: Number(incoming.riskScore || 0),
+      riskLevel: incoming.riskLevel || "LOW",
       isFraudulent: Boolean(incoming.isFraudulent),
       fraudReason: incoming.fraudReason || "",
       txnId: incoming.txnId || `TXN-${Date.now()}`,
       timestamp: incoming.timestamp ? new Date(incoming.timestamp) : new Date(),
       location: incoming.location || "Unknown",
       reason: incoming.reason || "",
+      merchantCategory: incoming.merchantCategory || "",
+      deviceId: incoming.deviceId || "",
+      fraudLabel: incoming.fraudLabel || "",
+      step: Number(incoming.step || 0),
+      oldbalanceOrg: Number(incoming.oldbalanceOrg || 0),
+      newbalanceOrig: Number(incoming.newbalanceOrig || 0),
+      oldbalanceDest: Number(incoming.oldbalanceDest || 0),
+      newbalanceDest: Number(incoming.newbalanceDest || 0),
     };
   }, [route?.params?.transaction]);
 
@@ -45,11 +55,20 @@ export default function PaymentDecisionScreen({ navigation, route }) {
       upiId: transaction.upiId,
       amount: transaction.amount,
       status: transaction.isFraudulent ? "flagged" : "success",
-      merchantTrustScore: transaction.trustScore,
+      merchantTrustScore: Math.round(transaction.riskScore * 100),
       timestamp: transaction.timestamp.toISOString(),
       transactionType: "expense",
       location: transaction.location,
       reason: transaction.reason,
+      isFraudulent: transaction.isFraudulent,
+      merchantCategory: transaction.merchantCategory,
+      deviceId: transaction.deviceId,
+      fraudLabel: transaction.fraudLabel,
+      step: transaction.step,
+      oldbalanceOrg: transaction.oldbalanceOrg,
+      newbalanceOrig: transaction.newbalanceOrig,
+      oldbalanceDest: transaction.oldbalanceDest,
+      newbalanceDest: transaction.newbalanceDest,
     });
     setSaving(false);
     setSaved(true);
@@ -89,6 +108,14 @@ export default function PaymentDecisionScreen({ navigation, route }) {
         <View style={styles.row}>
           <Text style={styles.label}>Location</Text>
           <Text style={styles.value}>{transaction.location}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Risk Level</Text>
+          <Text style={styles.value}>{transaction.riskLevel}</Text>
+        </View>
+        <View style={styles.row}>
+          <Text style={styles.label}>Risk Score</Text>
+          <Text style={styles.value}>{Math.round(transaction.riskScore * 100)}%</Text>
         </View>
         <View style={styles.row}>
           <Text style={styles.label}>Balance After</Text>

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
+  Dimensions,
   Easing,
   Pressable,
   StyleSheet,
@@ -15,6 +16,13 @@ import {
 } from "../../constants/mockData";
 import { appColors } from "../../constants/theme";
 
+const { width: screenWidth } = Dimensions.get("window");
+const headingSize = screenWidth < 360 ? 30 : 36;
+const typedSize = screenWidth < 360 ? 22 : 28;
+const typedSource = Array.isArray(heroTypedStrings) && heroTypedStrings.length
+  ? heroTypedStrings
+  : ["Real-time Risk Intelligence"];
+
 export default function LandingScreen({ navigation }) {
   const [typed, setTyped] = useState("");
   const [strIdx, setStrIdx] = useState(0);
@@ -28,7 +36,7 @@ export default function LandingScreen({ navigation }) {
   const glowFloatAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    Animated.stagger(130, [
+    const introAnim = Animated.stagger(130, [
       Animated.timing(topAnim, {
         toValue: 1,
         duration: 480,
@@ -47,9 +55,9 @@ export default function LandingScreen({ navigation }) {
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }),
-    ]).start();
+    ]);
 
-    Animated.loop(
+    const pulseLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(pulseAnim, {
           toValue: 1,
@@ -64,9 +72,9 @@ export default function LandingScreen({ navigation }) {
           useNativeDriver: true,
         }),
       ])
-    ).start();
+    );
 
-    Animated.loop(
+    const glowLoop = Animated.loop(
       Animated.sequence([
         Animated.timing(glowFloatAnim, {
           toValue: 1,
@@ -81,28 +89,44 @@ export default function LandingScreen({ navigation }) {
           useNativeDriver: true,
         }),
       ])
-    ).start();
+    );
+
+    introAnim.start();
+    pulseLoop.start();
+    glowLoop.start();
+
+    return () => {
+      introAnim.stop();
+      pulseLoop.stop();
+      glowLoop.stop();
+    };
   }, [bottomAnim, glowFloatAnim, heroAnim, pulseAnim, topAnim]);
 
   useEffect(() => {
-    const current = heroTypedStrings[strIdx];
+    const current = typedSource[strIdx % typedSource.length];
     const speed = deleting ? 45 : 85;
+    let holdTimer;
     const timer = setTimeout(() => {
       if (!deleting && charIdx < current.length) {
         setTyped(current.slice(0, charIdx + 1));
         setCharIdx((c) => c + 1);
       } else if (!deleting && charIdx === current.length) {
-        setTimeout(() => setDeleting(true), 1200);
+        holdTimer = setTimeout(() => setDeleting(true), 1200);
       } else if (deleting && charIdx > 0) {
         setTyped(current.slice(0, charIdx - 1));
         setCharIdx((c) => c - 1);
       } else {
         setDeleting(false);
-        setStrIdx((s) => (s + 1) % heroTypedStrings.length);
+        setStrIdx((s) => (s + 1) % typedSource.length);
       }
     }, speed);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      if (holdTimer) {
+        clearTimeout(holdTimer);
+      }
+    };
   }, [charIdx, deleting, strIdx]);
 
   return (
@@ -186,7 +210,7 @@ export default function LandingScreen({ navigation }) {
             ],
           }}
         >
-        <LinearGradient colors={["rgba(0,255,65,0.23)", "rgba(0,255,65,0.05)"]} style={styles.heroCard}>
+        <LinearGradient colors={["rgba(0,255,65,0.20)", "rgba(0,255,65,0.04)"]} style={styles.heroCard}>
           <Text style={styles.badge}>AI-Powered Real-Time Protection</Text>
           <Text style={styles.heading}>Secure Every{"\n"}UPI Payment</Text>
           <Text style={styles.typed}>
@@ -203,7 +227,7 @@ export default function LandingScreen({ navigation }) {
               <Text style={styles.statLabel}>Accuracy</Text>
             </View>
             <View style={styles.statBox}>
-              <Text style={styles.statValue}>{"< 200ms"}</Text>
+              <Text style={styles.statValue}>{"<200ms"}</Text>
               <Text style={styles.statLabel}>Detection</Text>
             </View>
             <View style={styles.statBox}>
@@ -244,8 +268,8 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     justifyContent: "space-between",
-    paddingTop: 10,
-    paddingBottom: 20,
+    paddingTop: 6,
+    paddingBottom: 16,
     position: "relative",
     overflow: "hidden",
   },
@@ -272,6 +296,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     gap: 10,
+    marginBottom: 8,
   },
   logoWrap: {
     flexDirection: "row",
@@ -314,6 +339,7 @@ const styles = StyleSheet.create({
     backgroundColor: appColors.primarySoft,
     paddingHorizontal: 10,
     paddingVertical: 6,
+    flexShrink: 1,
   },
   liveDot: {
     height: 7,
@@ -333,9 +359,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingVertical: 22,
     gap: 12,
-    marginTop: 14,
+    marginTop: 8,
     shadowColor: "#00ff41",
-    shadowOpacity: 0.22,
+    shadowOpacity: 0.16,
     shadowRadius: 24,
     shadowOffset: { width: 0, height: 10 },
     elevation: 4,
@@ -348,15 +374,16 @@ const styles = StyleSheet.create({
   },
   heading: {
     color: appColors.text,
-    fontSize: 36,
-    lineHeight: 38,
+    fontSize: headingSize,
+    lineHeight: headingSize + 2,
     fontWeight: "800",
   },
   typed: {
     color: appColors.primary,
-    fontSize: 28,
-    lineHeight: 30,
+    fontSize: typedSize,
+    lineHeight: typedSize + 2,
     fontWeight: "800",
+    minHeight: 34,
   },
   cursor: {
     color: appColors.primary,
@@ -374,6 +401,7 @@ const styles = StyleSheet.create({
   },
   statBox: {
     flex: 1,
+    minWidth: 0,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: appColors.border,
@@ -386,11 +414,13 @@ const styles = StyleSheet.create({
     color: appColors.text,
     fontWeight: "800",
     fontSize: 14,
+    textAlign: "center",
   },
   statLabel: {
     color: appColors.textMuted,
     fontSize: 10,
     textTransform: "uppercase",
+    textAlign: "center",
   },
   primaryBtnWrap: {
     borderRadius: 999,
@@ -417,7 +447,7 @@ const styles = StyleSheet.create({
   },
   bottomArea: {
     gap: 12,
-    marginTop: 16,
+    marginTop: 14,
   },
   footerCopy: {
     color: appColors.textMuted,

@@ -34,6 +34,16 @@ export function TransactionsProvider({ children }) {
         upiId: item.upiRecipient || item.upiId || "unknown@upi",
         location: item.location || "Unknown",
         reason: item.reason || "",
+        isFraudulent: Boolean(item.isFraudulent),
+        isFlaggedFraud: Boolean(item.isFlaggedFraud),
+        merchantCategory: item.merchantCategory || "",
+        deviceId: item.deviceId || "",
+        fraudLabel: item.fraudLabel || "",
+        step: Number(item.step || 0),
+        oldbalanceOrg: Number(item.oldbalanceOrg || 0),
+        newbalanceOrig: Number(item.newbalanceOrig || 0),
+        oldbalanceDest: Number(item.oldbalanceDest || 0),
+        newbalanceDest: Number(item.newbalanceDest || 0),
       }));
 
       setTransactions(normalizedRemote);
@@ -54,6 +64,16 @@ export function TransactionsProvider({ children }) {
       upiId: txn.upiId || "unknown@upi",
       location: txn.location || "Unknown",
       reason: txn.reason || "",
+      isFraudulent: Boolean(txn.isFraudulent),
+      isFlaggedFraud: Boolean(txn.isFlaggedFraud),
+      merchantCategory: txn.merchantCategory || "",
+      deviceId: txn.deviceId || "",
+      fraudLabel: txn.fraudLabel || "",
+      step: Number(txn.step || 0),
+      oldbalanceOrg: Number(txn.oldbalanceOrg || 0),
+      newbalanceOrig: Number(txn.newbalanceOrig || 0),
+      oldbalanceDest: Number(txn.oldbalanceDest || 0),
+      newbalanceDest: Number(txn.newbalanceDest || 0),
     };
 
     setTransactions((prev) => [normalized, ...prev]);
@@ -71,6 +91,16 @@ export function TransactionsProvider({ children }) {
       transactionType: normalized.transactionType,
       location: normalized.location,
       reason: normalized.reason,
+      isFraudulent: normalized.isFraudulent,
+      isFlaggedFraud: normalized.isFlaggedFraud,
+      merchantCategory: normalized.merchantCategory,
+      deviceId: normalized.deviceId,
+      fraudLabel: normalized.fraudLabel,
+      step: normalized.step,
+      oldbalanceOrg: normalized.oldbalanceOrg,
+      newbalanceOrig: normalized.newbalanceOrig,
+      oldbalanceDest: normalized.oldbalanceDest,
+      newbalanceDest: normalized.newbalanceDest,
     });
 
     return normalized;

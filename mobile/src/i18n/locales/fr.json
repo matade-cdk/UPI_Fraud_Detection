@@ -1,0 +1,74 @@
+{
+  "auth": {
+    "createAccount": "Creer un compte",
+    "welcomeBack": "Bon retour",
+    "signupSubtitle": "Inscrivez-vous avec nom d'utilisateur, e-mail et mot de passe",
+    "loginSubtitle": "Connectez-vous avec e-mail et mot de passe",
+    "brandSub": "Acces securise",
+    "login": "Connexion",
+    "signUp": "Inscription",
+    "username": "Nom d'utilisateur",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "enterUsername": "Saisir le nom d'utilisateur",
+    "enterPassword": "Saisir le mot de passe",
+    "createAccountCta": "Creer un compte",
+    "usernameError": "Le nom d'utilisateur doit contenir au moins 2 caracteres.",
+    "emailError": "Veuillez saisir une adresse e-mail valide.",
+    "passwordError": "Le mot de passe doit contenir au moins 6 caracteres.",
+    "failed": "Echec de l'authentification"
+  },
+  "tabs": {
+    "home": "Accueil",
+    "insights": "Analyses",
+    "transactions": "Transactions precedentes",
+    "transactionsShort": "Precedentes",
+    "profile": "Profil",
+    "scan": "Scanner"
+  },
+  "home": {
+    "totalBalance": "Solde total",
+    "income": "Revenus",
+    "expense": "Depenses",
+    "openingBalance": "Solde initial : {{value}}",
+    "sendMoney": "Envoyer de l'argent",
+    "newTransfer": "Nouveau transfert",
+    "transactionHistory": "Historique des transactions",
+    "unknown": "Inconnu",
+    "emptyHistory": "Aucun historique pour le moment. Commencez par envoyer de l'argent."
+  },
+  "insights": {
+    "title": "Analyses et statistiques",
+    "subtitle": "Tendance des depenses et resume des risques en direct depuis vos transactions liees au backend.",
+    "totalExpense": "Depense totale",
+    "safetyScore": "Score de securite",
+    "transactions": "Transactions",
+    "flagged": "Signalees",
+    "sevenDayGraph": "Graphique des depenses sur 7 jours"
+  },
+  "cards": {
+    "title": "Historique des transactions",
+    "subtitle": "Activite en direct liee au backend.",
+    "unknown": "Inconnu",
+    "empty": "Aucune transaction pour le moment."
+  },
+  "profile": {
+    "title": "Profil",
+    "subtitle": "Vos informations de compte liees a l'utilisateur authentifie.",
+    "name": "Nom",
+    "email": "E-mail",
+    "accountNumber": "Numero de compte",
+    "ifsc": "IFSC",
+    "language": "Langue",
+    "languageHint": "Choisissez la langue preferee de l'application"
+  },
+  "languages": {
+    "en": "Anglais",
+    "hi": "Hindi",
+    "kok": "Konkani",
+    "kn": "Kannada",
+    "mr": "Marathi",
+    "fr": "Francais",
+    "es": "Espagnol"
+  }
+}

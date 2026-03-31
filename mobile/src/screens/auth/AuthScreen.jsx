@@ -10,6 +10,7 @@ import {
   View,
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
+import { useTranslation } from "react-i18next";
 
 import ScreenContainer from "../../components/ScreenContainer";
 import { appColors } from "../../constants/theme";
@@ -18,39 +19,45 @@ import { useAuth } from "../../context/AuthContext";
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function AuthScreen({ navigation }) {
+  const { t } = useTranslation();
   const { login, signUp, loading } = useAuth();
   const [mode, setMode] = useState("login");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
 
   const title = useMemo(() => {
-    return mode === "signup" ? "Create account" : "Welcome back";
-  }, [mode]);
+    return mode === "signup" ? t("auth.createAccount") : t("auth.welcomeBack");
+  }, [mode, t]);
 
   const subtitle = useMemo(() => {
     return mode === "signup"
-      ? "Sign up with username, email and password"
-      : "Log in with email and password";
-  }, [mode]);
+      ? t("auth.signupSubtitle")
+      : t("auth.loginSubtitle");
+  }, [mode, t]);
+
+  const cleanUsername = username.trim();
+  const cleanEmail = email.trim().toLowerCase();
+  const usernameValid = mode !== "signup" || cleanUsername.length >= 2;
+  const emailValid = EMAIL_REGEX.test(cleanEmail);
+  const passwordValid = password.length >= 6;
+  const canSubmit = usernameValid && emailValid && passwordValid && !loading;
 
   async function handleSubmit() {
-    const cleanUsername = username.trim();
-    const cleanEmail = email.trim().toLowerCase();
-
     if (mode === "signup" && cleanUsername.length < 2) {
-      setError("Username should be at least 2 characters.");
+      setError(t("auth.usernameError"));
       return;
     }
 
     if (!EMAIL_REGEX.test(cleanEmail)) {
-      setError("Please enter a valid email address.");
+      setError(t("auth.emailError"));
       return;
     }
 
     if (password.length < 6) {
-      setError("Password should be at least 6 characters.");
+      setError(t("auth.passwordError"));
       return;
     }
 
@@ -63,7 +70,7 @@ export default function AuthScreen({ navigation }) {
     const result = mode === "signup" ? await signUp(payload) : await login(payload);
 
     if (!result.ok) {
-      setError(result.error || "Authentication failed");
+      setError(result.error || t("auth.failed"));
       return;
     }
 
@@ -78,7 +85,7 @@ export default function AuthScreen({ navigation }) {
       >
         <View style={styles.topRow}>
           <Text style={styles.brand}>UPI Guard</Text>
-          <Text style={styles.brandSub}>Secure access</Text>
+          <Text style={styles.brandSub}>{t("auth.brandSub")}</Text>
         </View>
 
         <LinearGradient
@@ -91,18 +98,20 @@ export default function AuthScreen({ navigation }) {
               onPress={() => {
                 setMode("login");
                 setError("");
+                setShowPassword(false);
               }}
             >
-              <Text style={[styles.toggleTxt, mode === "login" && styles.toggleTxtActive]}>Login</Text>
+              <Text style={[styles.toggleTxt, mode === "login" && styles.toggleTxtActive]}>{t("auth.login")}</Text>
             </Pressable>
             <Pressable
               style={[styles.toggleBtn, mode === "signup" && styles.toggleBtnActive]}
               onPress={() => {
                 setMode("signup");
                 setError("");
+                setShowPassword(false);
               }}
             >
-              <Text style={[styles.toggleTxt, mode === "signup" && styles.toggleTxtActive]}>Sign Up</Text>
+              <Text style={[styles.toggleTxt, mode === "signup" && styles.toggleTxtActive]}>{t("auth.signUp")}</Text>
             </Pressable>
           </View>
 
@@ -111,7 +120,7 @@ export default function AuthScreen({ navigation }) {
 
           {mode === "signup" ? (
             <View style={styles.inputWrap}>
-              <Text style={styles.label}>Username</Text>
+              <Text style={styles.label}>{t("auth.username")}</Text>
               <TextInput
                 value={username}
                 onChangeText={(value) => {
@@ -120,16 +129,17 @@ export default function AuthScreen({ navigation }) {
                     setError("");
                   }
                 }}
-                placeholder="Enter username"
+                placeholder={t("auth.enterUsername")}
                 placeholderTextColor={appColors.textMuted}
                 style={styles.input}
-                autoCapitalize="none"
+                autoCapitalize="words"
+                returnKeyType="next"
               />
             </View>
           ) : null}
 
           <View style={styles.inputWrap}>
-            <Text style={styles.label}>Email</Text>
+            <Text style={styles.label}>{t("auth.email")}</Text>
             <TextInput
               value={email}
               onChangeText={(value) => {
@@ -144,34 +154,56 @@ export default function AuthScreen({ navigation }) {
               keyboardType="email-address"
               autoCapitalize="none"
               autoCorrect={false}
+              autoComplete="email"
+              textContentType="emailAddress"
+              returnKeyType="next"
             />
           </View>
 
           <View style={styles.inputWrap}>
-            <Text style={styles.label}>Password</Text>
-            <TextInput
-              value={password}
-              onChangeText={(value) => {
-                setPassword(value);
-                if (error) {
-                  setError("");
-                }
-              }}
-              placeholder="Enter password"
-              placeholderTextColor={appColors.textMuted}
-              style={styles.input}
-              secureTextEntry
-              autoCapitalize="none"
-            />
+            <Text style={styles.label}>{t("auth.password")}</Text>
+            <View style={styles.passwordRow}>
+              <TextInput
+                value={password}
+                onChangeText={(value) => {
+                  setPassword(value);
+                  if (error) {
+                    setError("");
+                  }
+                }}
+                placeholder={t("auth.enterPassword")}
+                placeholderTextColor={appColors.textMuted}
+                style={styles.passwordInput}
+                secureTextEntry={!showPassword}
+                autoCapitalize="none"
+                autoComplete="password"
+                textContentType="password"
+                returnKeyType="go"
+                onSubmitEditing={handleSubmit}
+              />
+              <Pressable
+                onPress={() => setShowPassword((prev) => !prev)}
+                style={styles.passwordToggle}
+              >
+                <Text style={styles.passwordToggleText}>{showPassword ? "Hide" : "Show"}</Text>
+              </Pressable>
+            </View>
+            <Text style={styles.hintText}>Password must be at least 6 characters.</Text>
           </View>
 
           {error ? <Text style={styles.error}>{error}</Text> : null}
 
-          <Pressable style={styles.submitBtn} onPress={handleSubmit} disabled={loading}>
+          {!error && !canSubmit ? (
+            <Text style={styles.helperText}>Fill all required fields to continue.</Text>
+          ) : null}
+
+          <Pressable style={[styles.submitBtn, !canSubmit && styles.submitBtnDisabled]} onPress={handleSubmit} disabled={!canSubmit}>
             {loading ? (
               <ActivityIndicator size="small" color="#03280f" />
             ) : (
-              <Text style={styles.submitTxt}>{mode === "signup" ? "Create Account" : "Login"}</Text>
+              <Text style={styles.submitTxt}>
+                {mode === "signup" ? t("auth.createAccountCta") : t("auth.login")}
+              </Text>
             )}
           </Pressable>
         </LinearGradient>
@@ -261,6 +293,43 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 11,
   },
+  passwordRow: {
+    borderWidth: 1,
+    borderColor: appColors.border,
+    backgroundColor: "rgba(0,0,0,0.22)",
+    borderRadius: 12,
+    paddingLeft: 12,
+    paddingRight: 8,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  passwordInput: {
+    flex: 1,
+    color: appColors.text,
+    paddingVertical: 11,
+  },
+  passwordToggle: {
+    minWidth: 56,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: "rgba(0,255,65,0.12)",
+  },
+  passwordToggleText: {
+    color: appColors.text,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  hintText: {
+    color: appColors.textMuted,
+    fontSize: 11,
+    marginTop: 4,
+  },
+  helperText: {
+    color: appColors.textMuted,
+    fontSize: 12,
+  },
   error: {
     color: appColors.danger,
     fontWeight: "600",
@@ -272,6 +341,9 @@ const styles = StyleSheet.create({
     borderRadius: 999,
     paddingVertical: 13,
     alignItems: "center",
+  },
+  submitBtnDisabled: {
+    opacity: 0.45,
   },
   submitTxt: {
     color: "#03280f",

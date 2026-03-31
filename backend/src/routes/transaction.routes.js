@@ -1,6 +1,8 @@
 const express = require("express");
 
 const {
+	getFraudAlerts,
+	getPublicTransactions,
 	getTransactions,
 	createTransaction,
 	getMyTransactions,
@@ -10,6 +12,8 @@ const { requireAuth, requireRole } = require("../middlewares/auth");
 
 const router = express.Router();
 
+router.get("/alerts", getFraudAlerts);
+router.get("/public", getPublicTransactions);
 router.get("/", requireAuth, getTransactions);
 router.get("/me", requireAuth, getMyTransactions);
 router.get("/user/:userId", requireAuth, requireRole(["admin"]), getTransactionsByPublicUserId);
