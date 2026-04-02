@@ -1,0 +1,74 @@
+{
+  "auth": {
+    "createAccount": "Create account",
+    "welcomeBack": "Welcome back",
+    "signupSubtitle": "Sign up with username, email and password",
+    "loginSubtitle": "Log in with email and password",
+    "brandSub": "Secure access",
+    "login": "Login",
+    "signUp": "Sign Up",
+    "username": "Username",
+    "email": "Email",
+    "password": "Password",
+    "enterUsername": "Enter username",
+    "enterPassword": "Enter password",
+    "createAccountCta": "Create Account",
+    "usernameError": "Username should be at least 2 characters.",
+    "emailError": "Please enter a valid email address.",
+    "passwordError": "Password should be at least 6 characters.",
+    "failed": "Authentication failed"
+  },
+  "tabs": {
+    "home": "Home",
+    "insights": "Insights",
+    "transactions": "Previous Transactions",
+    "transactionsShort": "Previous",
+    "profile": "Profile",
+    "scan": "Scan"
+  },
+  "home": {
+    "totalBalance": "Total Balance",
+    "income": "Income",
+    "expense": "Expense",
+    "openingBalance": "Opening balance: {{value}}",
+    "sendMoney": "Send Money",
+    "newTransfer": "New Transfer",
+    "transactionHistory": "Transaction History",
+    "unknown": "Unknown",
+    "emptyHistory": "No transaction history yet. Start by sending money."
+  },
+  "insights": {
+    "title": "Insights & Analytics",
+    "subtitle": "Live spend trend and risk summary from your backend-linked transactions.",
+    "totalExpense": "Total Expense",
+    "safetyScore": "Safety Score",
+    "transactions": "Transactions",
+    "flagged": "Flagged",
+    "sevenDayGraph": "7-Day Expense Graph"
+  },
+  "cards": {
+    "title": "Transaction History",
+    "subtitle": "Live activity linked with backend.",
+    "unknown": "Unknown",
+    "empty": "No transactions yet."
+  },
+  "profile": {
+    "title": "Profile",
+    "subtitle": "Your account details linked to authenticated user.",
+    "name": "Name",
+    "email": "Email",
+    "accountNumber": "Account Number",
+    "ifsc": "IFSC",
+    "language": "Language",
+    "languageHint": "Choose your preferred app language"
+  },
+  "languages": {
+    "en": "English",
+    "hi": "Hindi",
+    "kok": "Konkani",
+    "kn": "Kannada",
+    "mr": "Marathi",
+    "fr": "French",
+    "es": "Spanish"
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "username": "demo_user",
+    "email": "demo_user@example.com",
+    "password": "secret123",
+    "role": "user"
+  },
+  {
+    "username": "admin_user",
+    "email": "admin@upiguard.com",
+    "password": "admin123",
+    "role": "admin"
+  }
+]

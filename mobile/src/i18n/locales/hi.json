@@ -1,0 +1,74 @@
+{
+  "auth": {
+    "createAccount": "खाता बनाएं",
+    "welcomeBack": "वापसी पर स्वागत है",
+    "signupSubtitle": "यूज़रनेम, ईमेल और पासवर्ड से साइन अप करें",
+    "loginSubtitle": "ईमेल और पासवर्ड से लॉग इन करें",
+    "brandSub": "सुरक्षित प्रवेश",
+    "login": "लॉग इन",
+    "signUp": "साइन अप",
+    "username": "यूज़रनेम",
+    "email": "ईमेल",
+    "password": "पासवर्ड",
+    "enterUsername": "यूज़रनेम दर्ज करें",
+    "enterPassword": "पासवर्ड दर्ज करें",
+    "createAccountCta": "खाता बनाएं",
+    "usernameError": "यूज़रनेम कम से कम 2 अक्षरों का होना चाहिए।",
+    "emailError": "कृपया वैध ईमेल पता दर्ज करें।",
+    "passwordError": "पासवर्ड कम से कम 6 अक्षरों का होना चाहिए।",
+    "failed": "प्रमाणीकरण विफल"
+  },
+  "tabs": {
+    "home": "होम",
+    "insights": "इनसाइट्स",
+    "transactions": "पिछले लेन-देन",
+    "transactionsShort": "पिछले",
+    "profile": "प्रोफ़ाइल",
+    "scan": "स्कैन"
+  },
+  "home": {
+    "totalBalance": "कुल बैलेंस",
+    "income": "आय",
+    "expense": "खर्च",
+    "openingBalance": "शुरुआती बैलेंस: {{value}}",
+    "sendMoney": "पैसे भेजें",
+    "newTransfer": "नया ट्रांसफर",
+    "transactionHistory": "लेन-देन इतिहास",
+    "unknown": "अज्ञात",
+    "emptyHistory": "अभी कोई लेन-देन इतिहास नहीं है। पैसे भेजकर शुरू करें।"
+  },
+  "insights": {
+    "title": "इनसाइट्स और एनालिटिक्स",
+    "subtitle": "आपके बैकएंड से जुड़े लेन-देन पर आधारित लाइव खर्च ट्रेंड और जोखिम सारांश।",
+    "totalExpense": "कुल खर्च",
+    "safetyScore": "सुरक्षा स्कोर",
+    "transactions": "लेन-देन",
+    "flagged": "फ़्लैग्ड",
+    "sevenDayGraph": "7-दिन खर्च ग्राफ"
+  },
+  "cards": {
+    "title": "लेन-देन इतिहास",
+    "subtitle": "बैकएंड से जुड़ी लाइव गतिविधि।",
+    "unknown": "अज्ञात",
+    "empty": "अभी कोई लेन-देन नहीं है।"
+  },
+  "profile": {
+    "title": "प्रोफ़ाइल",
+    "subtitle": "प्रमाणित उपयोगकर्ता से जुड़े आपके खाता विवरण।",
+    "name": "नाम",
+    "email": "ईमेल",
+    "accountNumber": "खाता संख्या",
+    "ifsc": "आईएफएससी",
+    "language": "भाषा",
+    "languageHint": "ऐप की पसंदीदा भाषा चुनें"
+  },
+  "languages": {
+    "en": "अंग्रेज़ी",
+    "hi": "हिंदी",
+    "kok": "कोंकणी",
+    "kn": "कन्नड़",
+    "mr": "मराठी",
+    "fr": "फ़्रेंच",
+    "es": "स्पैनिश"
+  }
+}
