@@ -1,0 +1,22 @@
+[
+  {
+    "txnId": "TXN-1001",
+    "receiverName": "Rahul Traders",
+    "upiRecipient": "rahul@okhdfc",
+    "amount": 4200,
+    "currency": "INR",
+    "score": 12,
+    "status": "success",
+    "time": "2026-03-29T10:30:00Z"
+  },
+  {
+    "txnId": "TXN-1002",
+    "receiverName": "Unknown Merchant",
+    "upiRecipient": "unknown@okaxis",
+    "amount": 82000,
+    "currency": "INR",
+    "score": 91,
+    "status": "flagged",
+    "time": "2026-03-30T07:12:00Z"
+  }
+]

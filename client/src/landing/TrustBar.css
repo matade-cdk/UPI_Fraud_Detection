@@ -1,0 +1,60 @@
+/* TrustBar */
+.trust-bar {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid rgba(0,255,65,.1);
+  border-bottom: 1px solid rgba(0,255,65,.1);
+  background: rgba(0,255,65,.03);
+  padding: 1.1rem 0;
+}
+.trust-bar__inner {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+.trust-bar__label {
+  font-family: var(--font-mono);
+  font-size: .65rem;
+  color: rgba(0,255,65,.4);
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.trust-bar__logos {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.trust-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .1rem;
+  padding: .3rem .8rem;
+  border: 1px solid rgba(0,255,65,.14);
+  border-radius: 3px;
+  background: rgba(0,255,65,.04);
+  transition: border-color .3s, box-shadow .3s;
+  cursor: default;
+}
+.trust-logo:hover {
+  border-color: rgba(0,255,65,.4);
+  box-shadow: 0 0 12px rgba(0,255,65,.2);
+}
+.trust-logo__abbr {
+  font-family: var(--font-display);
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: .08em;
+}
+.trust-logo__name {
+  font-family: var(--font-mono);
+  font-size: .55rem;
+  color: rgba(232,255,232,.4);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
